@@ -24,23 +24,16 @@ st.markdown("""
 st.title("🔧 Heavy Equipment AI Assistant")
 st.markdown("Your multi-AI diagnostic, repair, and spec partner for heavy earth-moving machinery.")
 
-# Sidebar Configuration
-with st.sidebar:
-    st.header("⚙️ Settings & API Keys")
-    
-    ai_provider = st.selectbox(
-        "Choose AI Engine",
-        ["Google Gemini", "OpenAI GPT"]
-    )
-    
-    if ai_provider == "Google Gemini":
-        api_key = st.text_input("Enter Gemini API Key", type="password")
-        model_name = "gemini-2.5-flash"
-    else:
-        api_key = st.text_input("Enter OpenAI API Key", type="password")
-        model_name = "gpt-4o"
+# ==========================================
+# HARDCODE YOUR API KEY BELOW (Replace the text inside quotes)
+# ==========================================
+ai_provider = "Google Gemini"
+api_key = "AIzaSyYourActualKeyHere..." 
+model_name = "gemini-3.6-flash"
 
-    st.markdown("---")
+# Sidebar Quick Diagnostics
+with st.sidebar:
+    st.header("⚙️ Workshop Controls")
     st.markdown("### 🛠️ Quick Diagnostics")
     
     if st.button("🚨 Decode Error Code"):
@@ -77,8 +70,8 @@ user_prompt = st.chat_input("Describe the machine issue or paste text here...")
 prompt_to_process = user_prompt if user_prompt else initial_input
 
 if prompt_to_process:
-    if not api_key:
-        st.error("⚠️ Please enter your API key in the sidebar to proceed.")
+    if not api_key or "YourActualKey" in api_key:
+        st.error("⚠️ Please update your hardcoded API key in the code to proceed.")
     else:
         pil_image = None
         if uploaded_file is not None:
@@ -102,43 +95,24 @@ if prompt_to_process:
                         "and accurate part/spec recommendations."
                     )
                     
-                    reply = ""
+                    client = genai.Client(api_key=api_key)
                     
-                    if ai_provider == "Google Gemini":
-                        client = genai.Client(api_key=api_key)
+                    contents = [prompt_to_process]
+                    if pil_image:
+                        contents.append(pil_image)
                         
-                        contents = [prompt_to_process]
-                        if pil_image:
-                            contents.append(pil_image)
-                            
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=contents,
-                            config=types.GenerateContentConfig(
-                                system_instruction=system_instruction
-                            )
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_instruction
                         )
-                        reply = response.text
-
-                    elif ai_provider == "OpenAI":
-                        client = openai.OpenAI(api_key=api_key)
-                        
-                        openai_messages = [{"role": "system", "content": system_instruction}]
-                        for m in st.session_state.messages:
-                            if m["role"] == "user":
-                                openai_messages.append({"role": "user", "content": m["content"]})
-                            elif m["role"] == "assistant":
-                                openai_messages.append({"role": "assistant", "content": m["content"]})
-                                
-                        response = client.chat.completions.create(
-                            model=model_name,
-                            messages=openai_messages
-                        )
-                        reply = response.choices[0].message.content
+                    )
+                    reply = response.text
 
                     st.markdown(reply)
                     st.session_state.messages.append({"role": "assistant", "content": reply, "image": None})
 
                 except Exception as e:
                     st.error(f"❌ Error communicating with AI: {e}")
-                      
+        

@@ -28,7 +28,7 @@ st.markdown("Your multi-AI diagnostic, repair, and spec partner for heavy earth-
 # HARDCODE YOUR API KEY BELOW (Replace the text inside quotes)
 # ==========================================
 ai_provider = "Google Gemini"
-api_key = "AIzaSyYourActualKeyHere..." 
+api_key = "AQ.Ab8RN6LN-LiGJYypsg-cxjBIIl-_mUpmHpe2Xw_VibYF191Klg" 
 model_name = "gemini-3.6-flash"
 
 # Sidebar Quick Diagnostics
